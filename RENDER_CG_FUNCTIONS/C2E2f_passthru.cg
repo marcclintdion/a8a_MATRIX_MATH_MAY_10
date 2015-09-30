@@ -1,0 +1,53 @@
+float3 globalAmbient = (1.0, 1.0, 1.0);
+float3 lightColor = (1.0, 1.0, 1.0);
+float3 eyePosition = (1.0, 1.0, 1.0);
+
+
+
+struct C2E2f_Output {
+  float4 color : COLOR;
+};
+
+//  float4 position  : POSITION,
+//  float3 normal    : NORMAL,
+//  float3 texCoord : TEXCOORD0,////   EXPLODED MODEL
+
+C2E2f_Output C2E2f_passthru(float4 color     : COLOR,
+                            float2 texCoord  : TEXCOORD0, ///EXPLODED MODEL
+                            float4 position  : TEXCOORD1,                        
+                            float3 normal    : TEXCOORD2,
+
+                            uniform float3 lightPosition,
+
+                            uniform float3 Ke,
+                            uniform float3 Ka,
+                            uniform float3 Kd,
+                            uniform float3 Ks,
+                            uniform float  shininess)
+{
+  C2E2f_Output OUT;
+  
+  float3 P = position.xyz;
+  float3 N = normalize(normal);
+  float3 emissive = Ke;
+  float3 ambient = Ka * globalAmbient;
+  
+  float3 L = normalize(lightPosition - P);
+  float diffuseLight = max(dot(L, N), 0);
+  float3 diffuse = Kd * lightColor * diffuseLight;
+  
+    // Compute the specular term
+  float3 V = normalize(eyePosition - P);
+  float3 H = normalize(L + V);
+  float specularLight = pow(max(dot(H, N), 0), shininess);
+  if (diffuseLight <= 0) specularLight = 0;
+  float3 specular = Ks * lightColor * specularLight;
+  
+  color.xyz = emissive + ambient + diffuse + specular;  
+  OUT.color = globalAmbient;
+  return OUT;
+}
+
+
+
+

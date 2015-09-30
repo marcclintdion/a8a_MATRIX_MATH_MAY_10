@@ -1,0 +1,72 @@
+// This is C2E2f_passthru from "The Cg Tutorial" (Addison-Wesley, ISBN
+// 0321194969) by Randima Fernando and Mark J. Kilgard.  See page 62.
+
+float3 globalAmbient = (1.0, 1.0, 1.0);
+float3 lightColor = (1.0, 1.0, 1.0);
+float3 eyePosition = (1.0, 1.0, 1.0);
+
+float4 intermediate;
+
+void C3E1v_anycolor(        float4 position  : POSITION,
+                            float3 normal    : NORMAL,
+                            float3 texCoord  : TEXCOORD0,////   EXPLODED MODEL
+                            float3 texCoord1 : TEXCOORD1,///____SHADER NOT ACCEPTING MULTI_TEXTURE COORDINATES
+                            
+                            uniform float    keyFrameBlend,
+                            
+                            out float4 oPosition : POSITION,
+                            out float3 objectPos : TEXCOORD1,
+                            out float3 oNormal   : TEXCOORD2,
+                            out float4 color     : COLOR,
+                            out float  pointSize : PSIZE,
+                            
+                            uniform float3 lightPosition,                            
+                            uniform float4x4 ModelViewProj,
+                            uniform float3 Ke,
+                            uniform float3 Ka,
+                            uniform float3 Kd,
+                            uniform float3 Ks,
+                            uniform float  shininess)
+{
+  intermediate = float4(texCoord, 1.0);
+  position = lerp(position, intermediate, keyFrameBlend);
+  position = position;
+
+
+ 
+  if(position.y >= -0.5)
+         position.y -= 4.9 * keyFrameBlend * keyFrameBlend;
+  
+  if(position.y <=  -0.5)
+         position.y = -0.5;    
+
+  
+  
+  
+  oPosition = mul(ModelViewProj, position);
+
+  float3 P = position.xyz;
+  float3 N = normal;
+
+  float3 emissive = Ke;//_______________________________________Compute emissive term
+
+  float3 ambient = Ka * globalAmbient;//________________________Compute ambient term
+
+  float3 L = normalize(lightPosition - P);
+  float diffuseLight = max(dot(N, L), 0);
+  float3 diffuse = Kd * lightColor * diffuseLight;//____________Compute the diffuse term
+
+  float3 V = normalize(eyePosition - P);
+  float3 H = normalize(L + V);
+  float specularLight = pow(max(dot(N, H), 0), shininess);//____Compute the specular term
+  if (diffuseLight <= 0) specularLight = 0;
+  float3 specular = Ks * lightColor * specularLight;
+
+  color.xyz = emissive + ambient + diffuse + specular;
+  color.w = 1;
+  
+  //pointSize = 1.0;  ///___no effect
+ 
+  objectPos = position.xyz;
+  oNormal = normal;
+}

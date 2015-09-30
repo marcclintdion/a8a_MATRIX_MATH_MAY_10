@@ -1,0 +1,69 @@
+
+void main( in float4 position : POSITION, 
+           in float2 texCoord : TEXCOORD0, 
+           in float3 N : NORMAL,	
+		   uniform float4x4 ModelViewProj, 
+           uniform float4x4 ModelView, 
+           uniform	float4x4 ModelViewI,
+		   uniform float4x4 ModelViewIT, 
+
+           uniform float3 globalAmbient,
+           uniform float3 lightColor,           
+           uniform float4 lightPosition,
+
+           out float3 diffuse,
+           out float3 L,             
+           uniform float3 eyePosition,
+           //uniform float3 Ke,
+           uniform float3 Ka,
+           uniform float3 Kd,
+           uniform float3 Ks,
+           uniform float  shininess,
+           uniform float  time,
+           
+           float4 tempPosition,
+           out float3 vertexColor : TEXCOORD3, 
+           
+           out float4 oPosition : POSITION, 
+           out float2 oTexCoord : TEXCOORD0, 
+           out float3 oOsR	: TEXCOORD1,
+           out float3 oNormal   : TEXCOORD2, 
+           float3 normal   : NORMAL) 
+{
+    
+    
+    
+    
+
+    
+    oTexCoord = texCoord;
+	
+    float4 wsPosition = mul( ModelView, position );
+    float3 wsN = mul( ( float3x3 )ModelViewIT, N );
+    wsN = normalize( wsN );
+    float3 wsI = wsPosition.xyz - eyePosition;
+    float3 wsR = reflect( wsI, wsN );
+    oOsR = mul( ( float3x3 )ModelViewI, wsR );
+    
+    float3 P = position.xyz;
+    float3 ambient = Ka * globalAmbient;/////_______________________AMBIENT
+    L = normalize(lightPosition - P);
+    float diffuseLight = max(dot(N, L), 0);/////______________________DIFFUSE
+    diffuse = Kd * lightColor * diffuseLight;
+    vertexColor = ambient + diffuse;
+    
+    oNormal = normal * wsI;
+
+    oPosition = mul( ModelViewProj, position );
+
+    
+    
+}
+
+
+//------------------------------------------------------------------------------
+//           Name: oglu_per_vertex_reflective_environment_mapping.cpp
+//         Author: Christoph Kabek//  Last Modified: 07/17/07
+
+
+//ambient+diffuse lighting from nVidia cG_toolikit--->>>fragment lighting(moved to perVertex here);last modified(nov04,09) marc_dion_cornwallOnt

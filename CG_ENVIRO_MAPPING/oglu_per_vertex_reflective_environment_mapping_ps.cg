@@ -1,0 +1,30 @@
+
+void main(in float4	position : POSITION, 
+          in float2 texCoord : TEXCOORD0,
+          in float3 R : TEXCOORD1,              /////____IN VERTEX SHADER HIS VARIABLE WAS --->>>oOsR
+          in float3 Normal   : TEXCOORD2,
+
+          in float3 vertexColor : TEXCOORD3, 
+
+          in float3 diffuse,
+          in float3 L,
+          float NdotL,
+          
+          float4 tempColor,
+          out float4 oColor : COLOR,
+          uniform samplerCUBE environmentMap) 
+{
+  
+   diffuse -= .01;
+    
+    tempColor = texCUBE(environmentMap, R);
+    
+    tempColor.xyz += (vertexColor) ;
+    
+    NdotL =  max(dot(Normal, L.x*-1), 0);
+    
+    tempColor.xyz += diffuse * NdotL;
+   
+    
+    oColor = tempColor;
+}

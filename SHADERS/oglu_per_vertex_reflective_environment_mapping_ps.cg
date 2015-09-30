@@ -1,0 +1,7 @@
+
+void main(in float4	position : POSITION, in float2 texCoord : TEXCOORD0,
+          in float3 R : TEXCOORD1, out float4 oColor : COLOR,
+          uniform samplerCUBE environmentMap ) 
+{
+    oColor = texCUBE( environmentMap, R );
+}

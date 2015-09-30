@@ -1,0 +1,26 @@
+
+void main( in float4 position : POSITION, in float2 texCoord : TEXCOORD0, in float3 N : NORMAL,	
+		    uniform float4x4 ModelViewProj, uniform float4x4 ModelView, uniform	float4x4 ModelViewI,
+		    uniform float4x4 ModelViewIT, uniform float3 eyePosition, out float4 oPosition : POSITION, 
+            out	float2 oTexCoord : TEXCOORD0, out	float3 oOsR	: TEXCOORD1 ) 
+{
+    oPosition = mul( ModelViewProj, position );
+    
+    oTexCoord = texCoord;
+	
+    float4 wsPosition = mul( ModelView, position );
+    
+    wsPosition /= wsPosition.w;
+	float3 wsN = mul( ( float3x3 )ModelViewIT, N );
+    wsN = normalize( wsN );
+
+    float3 wsI = wsPosition.xyz - eyePosition;
+    float3 wsR = reflect( wsI, wsN );
+    oOsR = mul( ( float3x3 )ModelViewI, wsR );
+}
+
+
+//------------------------------------------------------------------------------
+//           Name: oglu_per_vertex_reflective_environment_mapping.cpp
+//         Author: Christoph Kabek
+//  Last Modified: 07/17/07
